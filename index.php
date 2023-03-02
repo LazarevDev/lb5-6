@@ -1,24 +1,31 @@
-<?php
+<?php 
 session_start();
+require_once('require/db.php');
+require_once('require/cookie-check-auth.php');
 
-if(!empty($_SESSION['name']) OR !empty($_SESSION['password'])){
-    header('Location: profile.php');
-}
-
+$msg = "";
 
 if(isset($_POST['submit'])){
-    $name = $_POST['name'];
+    $login = $_POST['login'];
     $password = $_POST['password'];
     $password = md5($password);
 
-    $_SESSION['name'] = $name;
-    $_SESSION['password'] = $password;
-    $_SESSION['them'] = 'light';
+    if(!empty($login) and !empty($password)){
+        $query = mysqli_query($db, "SELECT * FROM `users` WHERE `login` = '$login' and `password` = '$password'");
+        $result = mysqli_fetch_array($query);
 
-    header('Location: profile.php');
-    exit;
+        if(is_array($result) && $result['login'] == $login && $result['password'] == $password){
+            setcookie('login', $login);
+            setcookie('password', $password);
+            $_SESSION['them'] = 'light';
+            header('Location: index.php');
+        }else{
+            $msg = "Вы ввели некорректные данные";
+        }
+    }else{
+        $msg = "Вы заполнили не все данные";
+    }
 }
-
 ?>
 
 <!DOCTYPE html>
@@ -30,10 +37,14 @@ if(isset($_POST['submit'])){
     <title>Document</title>
 </head>
 <body>
+    <?php echo $msg; ?>
+    
     <form action="" method="post">
-        <input type="text" name="name" placeholder="Имя"><br>
+        <input type="text" name="login" placeholder="Логин"><br>
         <input type="password" name="password" placeholder="Пароль"><br>
-        <input type="submit" name="submit" value="Регистрация">
+        <input type="submit" name="submit" value="Войти">
+        <a href="register.php">Регистрация</a>
     </form>
+
 </body>
 </html>

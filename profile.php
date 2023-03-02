@@ -1,9 +1,12 @@
 <?php 
 session_start();
+require_once('require/db.php');
+require_once('require/cookie-check.php');
 require_once('require/requestURL.php');
 
-echo "Имя: ".$_SESSION['name']."<br>";
-echo "Пароль: ".$_SESSION['password']."<br>";
+$query = mysqli_query($db, "SELECT * FROM `users` WHERE `login` = '$loginCookieCheck'");
+$result = mysqli_fetch_array($query);
+
 ?>
 
 <!DOCTYPE html>
@@ -12,48 +15,42 @@ echo "Пароль: ".$_SESSION['password']."<br>";
     <meta charset="UTF-8">
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="css/profile.css">
+
+    <link rel="stylesheet" href="css/<?php if($_SESSION['them'] == 'dark'){
+        echo "dark"; 
+    } ?>.css">
+   
     <title>Document</title>
 
     <style>
-        *{
-            padding: 0;
-            margin: 0;
-        }
-
         body{
             <?php if($_SESSION['them'] == 'dark'){
-                echo "background: #161616; 
-                color: #fff;
-                "; 
-            
+                    echo "background: #161616; color: #fff;"; 
             } ?>
         }
-
     </style>
 </head>
-<body >
+<body>
+    <section class="profile">
+        <div class="container">
+            <div class="topProfile">
+                <h2><?php echo "Добро пожаловать, ".$result['name']; ?></h2>
+            </div>
 
-    <?php 
-        if($_SESSION['them'] == 'dark'){ 
-            echo "Темная тема";
-        }elseif($_SESSION['them'] == 'light'){
-            echo "Светлая тема";
-        }else{
-            echo "error";
-        }
-    ?>
-
-    <h2>Вы посетили</h2>
-
-    <?php 
-    foreach ($_SESSION['history'] as $key => $value) {
-       echo $value."<br>";
-    }
-    ?>
-
-    <a href="them.php">Сменить тему</a>
-    <a href="logout.php">Выход</a>
-
-    <a href="require/deleteHistory.php">Очистить историю</a>
+            <div class="contentProfile">
+                <?php require_once('require/menu.php'); ?>
+                
+                <div class="historyBlock">
+                    <h2>Вы посетили</h2>
+                    <?php 
+                    foreach ($_SESSION['history'] as $key => $value) {
+                        echo "<p>".$value."</p>";
+                    }
+                    ?>
+                </div>
+            </div>
+        </div>
+    </section>
 </body>
 </html>
